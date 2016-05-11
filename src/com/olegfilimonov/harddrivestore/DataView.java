@@ -16,10 +16,16 @@
 
 package com.olegfilimonov.harddrivestore;
 
+import org.primefaces.event.RowEditEvent;
+
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,21 +35,80 @@ import java.util.List;
 @ManagedBean
 public class DataView implements Serializable {
 
-    private List<Harddrive> harddrives;
+    private List<HardDrive> hardDrives;
+    private List<Order> orders;
+
+    @ManagedProperty("#{storeService}")
+    private StoreService storeService;
+
+    private boolean filteringEnabled = false;
 
     @PostConstruct
     public void init() {
+        downloadHarddrives();
+        downloadOrders();
     }
 
-    public List<Harddrive> getHarddrives() {
-        return harddrives;
+    private void downloadOrders() {
+        this.orders = storeService.getAllOrders();
     }
 
-    public void downloadHarddrives(){
-        harddrives = StoreService.getAllHardDrives();
+    public List<HardDrive> getHardDrives() {
+        return hardDrives;
     }
 
-    public void setHarddrives(List<Harddrive> harddrives) {
-        this.harddrives = harddrives;
+    public void downloadHarddrives() {
+        this.hardDrives = storeService.getAllHardDrives();
+    }
+
+    public void setHardDrives(List<HardDrive> hardDrives) {
+        this.hardDrives = hardDrives;
+    }
+
+    public boolean isFilteringEnabled() {
+        return filteringEnabled;
+    }
+
+    public void setFilteringEnabled(boolean filteringEnabled) {
+        this.filteringEnabled = filteringEnabled;
+    }
+
+    public List<String> getManufaturers() {
+        List<String> manufaturers = new ArrayList<>();
+        for (HardDrive hardDrive : hardDrives) {
+
+            String manufacturer = hardDrive.getManufacturer();
+
+            if (!manufaturers.contains(manufacturer))
+                manufaturers.add(manufacturer);
+        }
+
+        return manufaturers;
+    }
+
+    public void onRowEdit(RowEditEvent event) {
+        FacesMessage msg = new FacesMessage("Hard Drive Edited", ((HardDrive) event.getObject()).getName());
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+
+    public void onRowCancel(RowEditEvent event) {
+        FacesMessage msg = new FacesMessage("Hard Drive Cancelled", ((HardDrive) event.getObject()).getName());
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+
+    public StoreService getStoreService() {
+        return storeService;
+    }
+
+    public void setStoreService(StoreService storeService) {
+        this.storeService = storeService;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 }

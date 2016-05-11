@@ -21,62 +21,132 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui" xmlns:fn="http://xmlns.jcp.org/jsp/jstl/functions">
 <h:head>
 
 </h:head>
 <h:body>
     <h:form>
-        <p:dataTable id="tbl" var="harddrive" value="#{dataView.harddrives}"
-                     liveResize="true">
+
+        <!--Первая таблица-->
+
+        <p:dataTable id="tbl" var="hardDrive" widgetVar="hardDriveTable" resizableColumns="true" liveResize="true"
+                     value="#{dataView.hardDrives}" style="margin-bottom: 20px">
 
             <f:facet name="header">
-                All availible harddrives
+                Все жесткие диски
             </f:facet>
 
-            <p:ajax event="sort" skipChildren="false" />
+            <p:ajax event="rowEdit" listener="#{dataView.onRowEdit}" update="tbl" />
+            <p:ajax event="rowEditCancel" listener="#{dataView.onRowCancel}" update="tbl" />
 
-            <p:column headerText="country" sortBy="#{harddrive.country}">
-                <h:inputText value="#{harddrive.country}"/>
+            <p:ajax event="sort" skipChildren="false"/>
+
+            <p:column headerText="страна" sortBy="#{hardDrive.country}">
+                <h:outputText value="#{hardDrive.country}"/>
             </p:column>
 
-            <p:column headerText="manufacturer" sortBy="#{harddrive.manufacturer}">
-                <h:inputText value="#{harddrive.manufacturer}"/>
+            <p:column filterBy="#{hardDrive.manufacturer}" filterMatchMode="exact" headerText="производитель"
+                      sortBy="#{hardDrive.manufacturer}">
+
+                <h:outputText value="#{hardDrive.manufacturer}"/>
+                <f:facet name="filter">
+                    <p:selectOneMenu rendered="#{dataView.filteringEnabled}" label="Производители"
+                                     onchange="PF('hardDriveTable').filter()">
+                        <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                        <f:selectItems value="#{dataView.manufaturers}"/>
+                    </p:selectOneMenu>
+                </f:facet>
+
             </p:column>
 
-            <p:column headerText="name" sortBy="#{harddrive.name}">
-                <h:inputText value="#{harddrive.name}"/>
+            <p:column headerText="имя" sortBy="#{hardDrive.name}">
+                <h:outputText value="#{hardDrive.name}"/>
             </p:column>
 
-            <p:column headerText="size" sortBy="#{harddrive.size}">
-                <h:inputText value="#{harddrive.size}"/>
+            <p:column headerText="размер" sortBy="#{hardDrive.size}">
+                <h:outputText value="#{hardDrive.size}"/>
             </p:column>
 
-            <p:column headerText="interface" sortBy="#{harddrive.driveInterface}">
-                <h:inputText value="#{harddrive.driveInterface}"/>
+            <p:column headerText="интерфейс" sortBy="#{hardDrive.driveInterface}">
+                <h:outputText value="#{hardDrive.driveInterface}"/>
             </p:column>
 
-            <p:column headerText="form factor" sortBy="#{harddrive.formFactor}">
-                <h:inputText value="#{harddrive.formFactor}"/>
+            <p:column headerText="форм-фактор" sortBy="#{hardDrive.formFactor}">
+                <h:outputText value="#{hardDrive.formFactor}"/>
             </p:column>
 
-            <p:column headerText="rotation speed" sortBy="#{harddrive.rotationSpeed}">
-                <h:inputText value="#{harddrive.rotationSpeed}"/>
+            <p:column headerText="скорость вращения" sortBy="#{hardDrive.rotationSpeed}">
+                <h:outputText value="#{hardDrive.rotationSpeed}"/>
             </p:column>
 
-            <p:column headerText="quantity" sortBy="#{harddrive.quantity}">
-                <h:inputText value="#{harddrive.quantity}"/>
+            <p:column headerText="количество" sortBy="#{hardDrive.quantity}">
+                <h:outputText value="#{hardDrive.quantity}"/>
             </p:column>
 
-            <p:column headerText="price" sortBy="#{harddrive.retailPrice}">
-                <h:inputText value="#{harddrive.retailPrice}"/>
+            <p:column headerText="цена" sortBy="#{hardDrive.retailPrice}">
+                <h:outputText value="#{hardDrive.retailPrice}"/>
             </p:column>
+
+            <f:facet name="footer">
+                Всего показано #{fn:length(dataView.hardDrives)} жестких дисков.
+            </f:facet>
 
         </p:dataTable>
 
-        <p:commandButton value="Get all hard drive data" action="#{dataView.downloadHarddrives}" update="tbl" id="getAll"/>
+        <!--Панель управления таблицой-->
 
-        <p:commandButton value="Commit changes" action="#{dataView.downloadHarddrives}" update="tbl" id="commit"/>
+        <h:panelGrid columns="4" style="margin-bottom:10px" cellpadding="5">
+
+            <p:commandButton value="Get all hard drive data" action="#{dataView.downloadHarddrives}" update="tbl"
+                             id="getAll"/>
+            <p:commandButton value="Commit changes" action="#{dataView.downloadHarddrives}" update="tbl" id="commit"/>
+
+            <h:outputText value="Enable filtering"/>
+
+            <p:selectBooleanCheckbox value="#{dataView.filteringEnabled}">
+                <p:ajax update="tbl"/>
+            </p:selectBooleanCheckbox>
+        </h:panelGrid>
+
+        <p:spacer height="10"/>
+
+        <!--Вторая таблица-->
+
+        <p:dataTable id="orders" var="order" widgetVar="ordersTable" resizableColumns="true" liveResize="true"
+                     value="#{dataView.orders}" style="margin-bottom: 20px">
+
+            <f:facet name="header">
+                Все заказы
+            </f:facet>
+
+            <p:column headerText="название диска" sortBy="#{order.hardDriveName}">
+                <h:outputText value="#{order.hardDriveName}"/>
+            </p:column>
+
+            <p:column headerText="имя покупателя" sortBy="#{order.customerName}">
+                <h:outputText value="#{order.customerName}"/>
+            </p:column>
+
+            <p:column headerText="цена единицы" sortBy="#{order.price}">
+                <h:outputText value="#{order.price}"/>
+            </p:column>
+
+            <p:column headerText="количество" sortBy="#{order.quantity}">
+                <h:outputText value="#{order.quantity}"/>
+            </p:column>
+
+            <p:column headerText="Дата покупки" sortBy="#{order.purchaseDate}">
+                <h:outputText value="#{order.purchaseDate}"/>
+            </p:column>
+
+            <p:ajax event="sort" skipChildren="false"/>
+
+            <f:facet name="footer">
+                Всего показано #{fn:length(dataView.orders)} заказов.
+            </f:facet>
+
+        </p:dataTable>
 
     </h:form>
 </h:body>

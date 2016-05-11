@@ -16,6 +16,8 @@
 
 package com.olegfilimonov.harddrivestore;
 
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,8 @@ import java.util.List;
  * @author Oleg Filimonov
  */
 
+@ApplicationScoped
+@ManagedBean(name = "storeService")
 public class StoreService {
 
     /**
@@ -34,7 +38,7 @@ public class StoreService {
      */
     private static final String CONNECTION_STRING = Hidden.CONNECTION_STRING;
 
-    public static List<Harddrive> getAllHardDrives() {
+    public List<HardDrive> getAllHardDrives() {
 
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -69,13 +73,13 @@ public class StoreService {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(request);
 
-            List<Harddrive> harddrives = new ArrayList<>();
+            List<HardDrive> hardDrives = new ArrayList<>();
 
             if (resultSet == null) return null;
 
             while (resultSet.next()) {
 
-                Harddrive harddrive = new Harddrive(
+                HardDrive hardDrive = new HardDrive(
                         resultSet.getString("name"),
                         resultSet.getString("manufacturer"),
                         resultSet.getString("country"),
@@ -87,11 +91,88 @@ public class StoreService {
                         resultSet.getInt("quantity")
                 );
 
-                harddrives.add(harddrive);
+                hardDrives.add(hardDrive);
 
             }
 
-            return harddrives;
+            return hardDrives;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Close the connections after the data has been handled.
+            if (statement != null) try {
+                statement.close();
+            } catch (Exception ignored) {
+            }
+            if (connection != null) try {
+                connection.close();
+            } catch (Exception ignored) {
+            }
+            if (resultSet != null)
+                try {
+                    resultSet.close();
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+        }
+
+        return null;
+    }
+
+    public List<Order> getAllOrders() {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Declare the JDBC objects.
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = DriverManager.getConnection(CONNECTION_STRING);
+
+            String request = "SELECT " +
+                    "[order].quantity," +
+                    "order_date," +
+                    "first_name," +
+                    "last_name," +
+                    "name," +
+                    "manufacturer," +
+                    "retail_price" +
+                    " FROM dbo.[order]" +
+                    " JOIN dbo.hard_drive ON dbo.[order].hard_drive_id = dbo.hard_drive.hard_drive_id" +
+                    " JOIN dbo.customer ON dbo.[order].customer_id = dbo.customer.customer_id" +
+                    " JOIN dbo.manufacturer ON dbo.hard_drive.manufacturer_id = dbo.manufacturer.manufacturer_id" +
+                    " JOIN dbo.storage ON dbo.hard_drive.hard_drive_id = dbo.storage.hard_drive_id";
+
+            // Create and execute a SELECT SQL statement.
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(request);
+
+            List<Order> orders = new ArrayList<>();
+
+            if (resultSet == null) return null;
+
+            while (resultSet.next()) {
+
+                Order order = new Order(
+                        resultSet.getString("manufacturer") + " " + resultSet.getString("name"),
+                        resultSet.getString("last_name") + " " + resultSet.getString("first_name"),
+                        resultSet.getInt("quantity"),
+                        resultSet.getInt("retail_price"),
+                        resultSet.getDate("order_date")
+                );
+
+                orders.add(order);
+
+            }
+
+            return orders;
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -16,10 +16,12 @@
 
 package com.olegfilimonov.harddrivestore;
 
+import java.io.Serializable;
+
 /**
  * @author Oleg Filimonov
  */
-public class Harddrive {
+public class HardDrive implements Serializable {
     private String name;
     private String manufacturer;
     private String country;
@@ -31,7 +33,7 @@ public class Harddrive {
     private Integer retailPrice;
     private Integer quantity;
 
-    public Harddrive(String name, String manufacturer, String country, String driveInterface, String formFactor, int size, int rotationSpeed, int retailPrice, int quantity) {
+    public HardDrive(String name, String manufacturer, String country, String driveInterface, String formFactor, int size, int rotationSpeed, int retailPrice, int quantity) {
         this.name = name;
         this.manufacturer = manufacturer;
         this.country = country;
