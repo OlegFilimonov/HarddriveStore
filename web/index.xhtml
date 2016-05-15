@@ -26,19 +26,19 @@
 
 </h:head>
 <h:body>
-    <h:form>
+    <h:form id="mainForm">
 
         <!--Первая таблица-->
 
         <p:dataTable id="tbl" var="hardDrive" widgetVar="hardDriveTable" resizableColumns="true" liveResize="true"
-                     value="#{dataView.hardDrives}" style="margin-bottom: 20px">
+                     editable="true" value="#{dataView.hardDrives}" style="margin-bottom: 20px">
 
             <f:facet name="header">
                 Все жесткие диски
             </f:facet>
 
-            <p:ajax event="rowEdit" listener="#{dataView.onRowEdit}" update="tbl" />
-            <p:ajax event="rowEditCancel" listener="#{dataView.onRowCancel}" update="tbl" />
+            <p:ajax event="rowEdit" listener="#{dataView.onRowEdit}" update="tbl"/>
+            <p:ajax event="rowEditCancel" listener="#{dataView.onRowCancel}" update="tbl"/>
 
             <p:ajax event="sort" skipChildren="false"/>
 
@@ -53,7 +53,7 @@
                 <f:facet name="filter">
                     <p:selectOneMenu rendered="#{dataView.filteringEnabled}" label="Производители"
                                      onchange="PF('hardDriveTable').filter()">
-                        <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                        <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true"/>
                         <f:selectItems value="#{dataView.manufaturers}"/>
                     </p:selectOneMenu>
                 </f:facet>
@@ -98,11 +98,12 @@
 
         <h:panelGrid columns="4" style="margin-bottom:10px" cellpadding="5">
 
-            <p:commandButton value="Get all hard drive data" action="#{dataView.downloadHarddrives}" update="tbl"
-                             id="getAll"/>
-            <p:commandButton value="Commit changes" action="#{dataView.downloadHarddrives}" update="tbl" id="commit"/>
+            <p:commandButton value="Сохранить изменения" update="tbl" id="commit"/>
 
-            <h:outputText value="Enable filtering"/>
+            <p:commandButton value="Добавить новый жесткий диск" action="#{driveView.toggleAdding}"
+                             update="mainForm" id="addNewDrive"/>
+
+            <h:outputText value="Включить фильтр"/>
 
             <p:selectBooleanCheckbox value="#{dataView.filteringEnabled}">
                 <p:ajax update="tbl"/>
@@ -110,6 +111,34 @@
         </h:panelGrid>
 
         <p:spacer height="10"/>
+
+        <p:panel id="addDrive" rendered="#{driveView.adding}" header="Добавить диск" style="margin-bottom:20px">
+            <h:panelGrid columns="2" cellpadding="5">
+                <p:outputLabel value="Manufacturer:" />
+                <p:inputText value="#{driveView.manufacturer_id}" />
+
+                <p:outputLabel value="Name:" />
+                <p:inputText value="#{driveView.name}" />
+
+                <p:outputLabel value="Size:" />
+                <p:inputText value="#{driveView.size}" />
+
+                <p:outputLabel value="Interface:" />
+                <p:inputText value="#{driveView.driveInterface}" />
+
+                <p:outputLabel value="Rotation speed:" />
+                <p:inputText value="#{driveView.rotationSpeed}" />
+
+                <p:outputLabel value="Form factor:" />
+                <p:inputText value="#{driveView.formFactor}" />
+
+                <p:outputLabel value="Price:" />
+                <p:inputText value="#{driveView.retailPrice}" />
+
+                <p:commandButton value="Submit" update="addDrive" actionListener="#{driveView.addNewHardDrive}" icon="ui-icon-check" />
+
+            </h:panelGrid>
+        </p:panel>
 
         <!--Вторая таблица-->
 

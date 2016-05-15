@@ -67,7 +67,7 @@ public class StoreService {
                     " FROM hard_drive" +
                     " JOIN dbo.manufacturer ON dbo.manufacturer.manufacturer_id = dbo.hard_drive.manufacturer_id" +
                     " JOIN dbo.countries ON dbo.countries.country_id = dbo.manufacturer.country_id" +
-                    " JOIN dbo.storage ON dbo.storage.hard_drive_id = dbo.hard_drive.hard_drive_id";
+                    " LEFT JOIN dbo.storage ON dbo.storage.hard_drive_id = dbo.hard_drive.hard_drive_id";
 
             // Create and execute a SELECT SQL statement.
             statement = connection.createStatement();
@@ -137,16 +137,16 @@ public class StoreService {
             connection = DriverManager.getConnection(CONNECTION_STRING);
 
             String request = "SELECT " +
-                    "[order].quantity," +
+                    "[ORDER].quantity," +
                     "order_date," +
                     "first_name," +
                     "last_name," +
-                    "name," +
+                    "NAME," +
                     "manufacturer," +
                     "retail_price" +
-                    " FROM dbo.[order]" +
-                    " JOIN dbo.hard_drive ON dbo.[order].hard_drive_id = dbo.hard_drive.hard_drive_id" +
-                    " JOIN dbo.customer ON dbo.[order].customer_id = dbo.customer.customer_id" +
+                    " FROM dbo.[ORDER]" +
+                    " JOIN dbo.hard_drive ON dbo.[ORDER].hard_drive_id = dbo.hard_drive.hard_drive_id" +
+                    " JOIN dbo.customer ON dbo.[ORDER].customer_id = dbo.customer.customer_id" +
                     " JOIN dbo.manufacturer ON dbo.hard_drive.manufacturer_id = dbo.manufacturer.manufacturer_id" +
                     " JOIN dbo.storage ON dbo.hard_drive.hard_drive_id = dbo.storage.hard_drive_id";
 
@@ -196,5 +196,63 @@ public class StoreService {
         }
 
         return null;
+    }
+
+    public boolean executeSql(String request) {
+
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Declare the JDBC objects.
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepsInsertProduct = null;
+
+        try {
+            connection = DriverManager.getConnection(CONNECTION_STRING);
+
+
+            prepsInsertProduct = connection.prepareStatement(
+                    request,
+                    Statement.RETURN_GENERATED_KEYS);
+            prepsInsertProduct.execute();
+
+            // Retrieve the generated key from the insert.
+            resultSet = prepsInsertProduct.getGeneratedKeys();
+
+            // Print the ID of the inserted row.
+            while (resultSet.next()) {
+                System.out.println("Generated: " + resultSet.getString(1));
+            }
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Close the connections after the data has been handled.
+            if (prepsInsertProduct != null) try {
+                prepsInsertProduct.close();
+            } catch (Exception e) {
+            }
+            if (resultSet != null) try {
+                resultSet.close();
+            } catch (Exception e) {
+            }
+            if (statement != null) try {
+                statement.close();
+            } catch (Exception e) {
+            }
+            if (connection != null) try {
+                connection.close();
+            } catch (Exception e) {
+            }
+        }
+
+        return false;
+
     }
 }

@@ -49,6 +49,8 @@ public class DataView implements Serializable {
         downloadOrders();
     }
 
+
+
     private void downloadOrders() {
         this.orders = storeService.getAllOrders();
     }
